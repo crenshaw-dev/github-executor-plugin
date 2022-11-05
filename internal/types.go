@@ -6,11 +6,11 @@ type PluginSpec struct {
 }
 
 type ActionSpec struct {
-	PullRequest *PullRequestActionSpec `json:"pullRequest,omitempty"`
-	Timeout     string                 `json:"timeout,omitempty"`
+	Issue   *IssueActionSpec `json:"issue,omitempty"`
+	Timeout string           `json:"timeout,omitempty"`
 }
 
-type PullRequestActionSpec struct {
+type IssueActionSpec struct {
 	Comment *CommentAction `json:"comment,omitempty"`
 }
 

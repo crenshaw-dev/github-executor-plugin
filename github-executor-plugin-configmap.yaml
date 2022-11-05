@@ -1,0 +1,53 @@
+# This is an auto-generated file. DO NOT EDIT
+apiVersion: v1
+data:
+  sidecar.automountServiceAccountToken: "false"
+  sidecar.container: |
+    env:
+    - name: GITHUB_TOKEN
+      valueFrom:
+        secretKeyRef:
+          key: token
+          name: github-token
+    image: crenshaw-dev/github-executor-plugin:latest
+    imagePullPolicy: Never
+    name: github
+    ports:
+    - containerPort: 4355
+    resources:
+      limits:
+        cpu: 200m
+        memory: 64Mi
+      requests:
+        cpu: 100m
+        memory: 32Mi
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 1000
+kind: ConfigMap
+metadata:
+  annotations:
+    workflows.argoproj.io/description: "This is an Argo Workflow executor plugin for
+      interacting with GitHub.\n\n## Example\n\n```yaml\napiVersion: argoproj.io/v1alpha1\nkind:
+      Workflow\nmetadata:\n  generateName: github-example-\nspec:\n  entrypoint: main\n
+      \ templates:\n    - name: main\n      plugin:\n        github:\n          #
+      Use `issue` to create comments for PRs - the GitHub API considers PRs to be
+      issues.\n          issue:\n            comment:\n              body: \"Hello,
+      world!\"\n              number: \"1\"  # PR number, from the \n              owner:
+      crenshaw-dev\n              repo: github-executor-plugin\n```\n\n## Setup\n\n##
+      1. Set up a GitHub personal access token\n\nSee [GitHub's instructions](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token)\nto
+      set up your token.\n\nThen create a secret using that token.\n\n```bash\n# First,
+      copy your token to the clipboard.\npbpaste > token\nkubectl create secret generic
+      github-token --from-file=token -n argo\nrm token\n```\n\n## 2. Install the plugin\n\n```bash\nkubectl
+      apply -f https://raw.githubusercontent.com/crenshaw-dev/github-executor-plugin/main/plugin.yaml\n```\n\n##
+      3. Run a workflow\n\n```bash\nkubectl apply -f https://raw.githubusercontent.com/crenshaw-dev/github-executor-plugin/main/github-example-workflow.yaml\n```\n"
+    workflows.argoproj.io/version: '>= v3.3'
+  creationTimestamp: null
+  labels:
+    workflows.argoproj.io/configmap-type: ExecutorPlugin
+  name: github-executor-plugin

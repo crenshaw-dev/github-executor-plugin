@@ -4,4 +4,4 @@ build:
 
 .PHONY: manifests
 manifests:
-	argo executor-plugin build ./manifests
+	argo executor-plugin build .

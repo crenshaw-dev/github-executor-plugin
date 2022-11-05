@@ -1,0 +1,88 @@
+# This file generates the README. Run `make manifests` after editing this file.
+kind: ExecutorPlugin
+apiVersion: argoproj.io/v1alpha1
+metadata:
+  name: github
+  annotations:
+    workflows.argoproj.io/description: |
+      This is an Argo Workflow executor plugin for interacting with GitHub.
+      
+      ## Example
+      
+      ```yaml
+      apiVersion: argoproj.io/v1alpha1
+      kind: Workflow
+      metadata:
+        generateName: github-example-
+      spec:
+        entrypoint: main
+        templates:
+          - name: main
+            plugin:
+              github:
+                # Use `issue` to create comments for PRs - the GitHub API considers PRs to be issues.
+                issue:
+                  comment:
+                    body: "Hello, world!"
+                    number: "1"  # PR number, from the 
+                    owner: crenshaw-dev
+                    repo: github-executor-plugin
+      ```
+      
+      ## Setup
+      
+      ## 1. Set up a GitHub personal access token
+      
+      See [GitHub's instructions](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token)
+      to set up your token.
+      
+      Then create a secret using that token.
+      
+      ```bash
+      # First, copy your token to the clipboard.
+      pbpaste > token
+      kubectl create secret generic github-token --from-file=token -n argo
+      rm token
+      ```
+      
+      ## 2. Install the plugin
+      
+      ```bash
+      kubectl apply -f https://raw.githubusercontent.com/crenshaw-dev/github-executor-plugin/main/plugin.yaml
+      ```
+      
+      ## 3. Run a workflow
+      
+      ```bash
+      kubectl apply -f https://raw.githubusercontent.com/crenshaw-dev/github-executor-plugin/main/github-example-workflow.yaml
+      ```
+    workflows.argoproj.io/version: '>= v3.3'
+spec:
+  sidecar:
+    container:
+      image: crenshaw-dev/github-executor-plugin:latest
+      imagePullPolicy: Never
+      env:
+        - name: GITHUB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: github-token
+              key: token
+      name: github
+      ports:
+        - containerPort: 4355
+      resources:
+        requests:
+          cpu: 100m
+          memory: 32Mi
+        limits:
+          cpu: 200m
+          memory: 64Mi
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        readOnlyRootFilesystem: true
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL

@@ -64,7 +64,7 @@ func (e *GitHubExecutor) runAction(plugin *PluginSpec) (string, error) {
 		return "", fmt.Errorf("failed to parse timeout: %w", err)
 	}
 	defer cancel()
-	body, owner, repo, number, err := validatePullRequestAction(plugin.GitHub.PullRequest)
+	body, owner, repo, number, err := validatePullRequestAction(plugin.GitHub.Issue)
 	if err != nil {
 		return "", fmt.Errorf("invalid pull request action: %w", err)
 	}
@@ -84,7 +84,7 @@ func (e *GitHubExecutor) runAction(plugin *PluginSpec) (string, error) {
 	return "", nil
 }
 
-func validatePullRequestAction(action *PullRequestActionSpec) (body, owner, repo string, number int, err error) {
+func validatePullRequestAction(action *IssueActionSpec) (body, owner, repo string, number int, err error) {
 	if action == nil {
 		return "", "", "", -1, fmt.Errorf("the only available action for the GitHub plugin is 'pullRequest'")
 	}
