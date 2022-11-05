@@ -28,9 +28,9 @@ spec:
               repo: github-executor-plugin
 ```
 
-## Setup
+## Prerequisites
 
-## 1. Set up a GitHub personal access token
+### Set up a GitHub personal access token
 
 See [GitHub's instructions](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token)
 to set up your token.
@@ -44,17 +44,7 @@ kubectl create secret generic github-token --from-file=token -n argo
 rm token
 ```
 
-## 2. Install the plugin
-
-```bash
-kubectl apply -f https://raw.githubusercontent.com/crenshaw-dev/github-executor-plugin/main/plugin.yaml
-```
-
-## 3. Run a workflow
-
-```bash
-kubectl apply -f https://raw.githubusercontent.com/crenshaw-dev/github-executor-plugin/main/github-example-workflow.yaml
-```
+## How to install
 
 
 Install:

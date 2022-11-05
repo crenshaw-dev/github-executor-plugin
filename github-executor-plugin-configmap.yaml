@@ -39,13 +39,11 @@ metadata:
       Use `issue` to create comments for PRs - the GitHub API considers PRs to be
       issues.\n          issue:\n            comment:\n              body: \"Hello,
       world!\"\n              number: \"1\"  # PR number, from the \n              owner:
-      crenshaw-dev\n              repo: github-executor-plugin\n```\n\n## Setup\n\n##
-      1. Set up a GitHub personal access token\n\nSee [GitHub's instructions](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token)\nto
+      crenshaw-dev\n              repo: github-executor-plugin\n```\n\n## Prerequisites\n\n###
+      Set up a GitHub personal access token\n\nSee [GitHub's instructions](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token)\nto
       set up your token.\n\nThen create a secret using that token.\n\n```bash\n# First,
       copy your token to the clipboard.\npbpaste > token\nkubectl create secret generic
-      github-token --from-file=token -n argo\nrm token\n```\n\n## 2. Install the plugin\n\n```bash\nkubectl
-      apply -f https://raw.githubusercontent.com/crenshaw-dev/github-executor-plugin/main/plugin.yaml\n```\n\n##
-      3. Run a workflow\n\n```bash\nkubectl apply -f https://raw.githubusercontent.com/crenshaw-dev/github-executor-plugin/main/github-example-workflow.yaml\n```\n"
+      github-token --from-file=token -n argo\nrm token\n```\n\n## How to install\n"
     workflows.argoproj.io/version: '>= v3.3'
   creationTimestamp: null
   labels:
