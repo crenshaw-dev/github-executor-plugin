@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: hello-example-
+spec:
+  entrypoint: main
+  templates:
+    - name: main
+      plugin:
+        github:
+          pullRequest:
+            comment:
+              body: "Hello, world!"
+              number: "1"
+              owner: crenshaw-dev
+              repo: github-executor-plugin
+              tokenSecret:
+                key: token
+                name: github-token
