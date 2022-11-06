@@ -18,12 +18,20 @@ var (
 
 // Executor performs the tasks requested by the Workflow.
 type Executor interface {
+	Authorize(req *http.Request) error
 	// Execute runs commands based on the args provided from the workflow
 	Execute(args executor.ExecuteTemplateArgs) executor.ExecuteTemplateReply
 }
 
 func GitHubPlugin(plugin Executor) func(w http.ResponseWriter, req *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
+		err := plugin.Authorize(req)
+		if err != nil {
+			log.Printf("Error authorizing request: %v", err)
+			http.Error(w, "", http.StatusForbidden)
+			return
+		}
+
 		if header := req.Header.Get("Content-Type"); header != "application/json" {
 			log.Print(ErrWrongContentType)
 			http.Error(w, ErrWrongContentType.Error(), http.StatusBadRequest)

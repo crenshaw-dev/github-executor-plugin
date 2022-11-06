@@ -8,7 +8,7 @@ spec:
     - name: main
       plugin:
         github:
-          pullRequest:
+          issue:
             comment:
               body: "Hello, world!"
               number: "1"

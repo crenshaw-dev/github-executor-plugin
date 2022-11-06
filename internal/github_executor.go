@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -16,11 +17,20 @@ import (
 )
 
 type GitHubExecutor struct {
-	client *github.Client
+	client     *github.Client
+	agentToken string
 }
 
-func NewGitHubExecutor(client *github.Client) GitHubExecutor {
-	return GitHubExecutor{client: client}
+func NewGitHubExecutor(client *github.Client, agentToken string) GitHubExecutor {
+	return GitHubExecutor{client: client, agentToken: agentToken}
+}
+
+func (e *GitHubExecutor) Authorize(req *http.Request) error {
+	auth := req.Header.Get("Authorization")
+	if auth != "Bearer "+e.agentToken {
+		return fmt.Errorf("invalid agent token")
+	}
+	return nil
 }
 
 func (e *GitHubExecutor) Execute(args executor.ExecuteTemplateArgs) executor.ExecuteTemplateReply {
@@ -37,6 +47,10 @@ func (e *GitHubExecutor) Execute(args executor.ExecuteTemplateArgs) executor.Exe
 		err = fmt.Errorf("failed to unmarshal plugin JSON to plugin struct: %w", err)
 		log.Println(err.Error())
 		return errorResponse(err)
+	}
+
+	if plugin.GitHub == nil {
+		return executor.ExecuteTemplateReply{} // unsupported plugin
 	}
 
 	output, err := e.runAction(plugin)
@@ -64,51 +78,51 @@ func (e *GitHubExecutor) runAction(plugin *PluginSpec) (string, error) {
 		return "", fmt.Errorf("failed to parse timeout: %w", err)
 	}
 	defer cancel()
-	body, owner, repo, number, err := validatePullRequestAction(plugin.GitHub.Issue)
+	body, owner, repo, number, err := validateIssueAction(plugin.GitHub.Issue)
 	if err != nil {
-		return "", fmt.Errorf("invalid pull request action: %w", err)
+		return "", fmt.Errorf("invalid issue action: %w", err)
 	}
 	_, response, err := e.client.Issues.CreateComment(ctx, owner, repo, number, &github.IssueComment{
 		Body: &body,
 	})
 	if err != nil {
-		return "", fmt.Errorf("failed to create pull request comment: %w", err)
+		return "", fmt.Errorf("failed to create issue comment: %w", err)
 	}
 	if response.StatusCode != 201 {
 		responseBody, err := io.ReadAll(response.Body)
 		if err != nil {
 			return "", fmt.Errorf("failed to read response body: %w", err)
 		}
-		return "", fmt.Errorf("failed to create pull request comment: %s", string(responseBody))
+		return "", fmt.Errorf("failed to create issue comment: %s", string(responseBody))
 	}
 	return "", nil
 }
 
-func validatePullRequestAction(action *IssueActionSpec) (body, owner, repo string, number int, err error) {
+func validateIssueAction(action *IssueActionSpec) (body, owner, repo string, number int, err error) {
 	if action == nil {
-		return "", "", "", -1, fmt.Errorf("the only available action for the GitHub plugin is 'pullRequest'")
+		return "", "", "", -1, fmt.Errorf("the only available action for the GitHub plugin is 'issue'")
 	}
 	if action.Comment == nil {
-		return "", "", "", -1, fmt.Errorf("the only available action for pull requests is `comment`")
+		return "", "", "", -1, fmt.Errorf("the only available action for issues is `comment`")
 	}
 	if action.Comment.Body == "" {
-		return "", "", "", -1, fmt.Errorf("the pull request comment body is required")
+		return "", "", "", -1, fmt.Errorf("the issue comment body is required")
 	}
 	if action.Comment.Owner == "" {
-		return "", "", "", -1, fmt.Errorf("the pull request owner is required")
+		return "", "", "", -1, fmt.Errorf("the issue owner is required")
 	}
 	if action.Comment.Repo == "" {
-		return "", "", "", -1, fmt.Errorf("the pull request repo is required")
+		return "", "", "", -1, fmt.Errorf("the issue repo is required")
 	}
 	if action.Comment.Number == "" {
-		return "", "", "", -1, fmt.Errorf("the pull request number is required")
+		return "", "", "", -1, fmt.Errorf("the issue number is required")
 	}
 	number, err = strconv.Atoi(action.Comment.Number)
 	if err != nil {
-		return "", "", "", -1, fmt.Errorf("the pull request number must be an integer")
+		return "", "", "", -1, fmt.Errorf("the issue number must be an integer")
 	}
 	if number < 0 {
-		return "", "", "", -1, fmt.Errorf("the pull request number must be greater than or equal to 0")
+		return "", "", "", -1, fmt.Errorf("the issue number must be greater than or equal to 0")
 	}
 	return action.Comment.Body, action.Comment.Owner, action.Comment.Repo, number, nil
 }
