@@ -9,8 +9,7 @@ data:
         secretKeyRef:
           key: token
           name: github-token
-    image: crenshaw-dev/github-executor-plugin:latest
-    imagePullPolicy: Never
+    image: crenshawdotdev/github-executor-plugin:latest
     name: github
     ports:
     - containerPort: 4356

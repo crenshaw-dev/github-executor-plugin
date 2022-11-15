@@ -2,7 +2,7 @@
 # github
 
 * Needs: >= v3.3
-* Image: crenshaw-dev/github-executor-plugin:latest
+* Image: crenshawdotdev/github-executor-plugin:latest
 
 This is an Argo Workflow executor plugin for interacting with GitHub.
 

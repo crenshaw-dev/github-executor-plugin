@@ -50,8 +50,7 @@ metadata:
 spec:
   sidecar:
     container:
-      image: crenshaw-dev/github-executor-plugin:latest
-      imagePullPolicy: Never
+      image: crenshawdotdev/github-executor-plugin:latest
       env:
         - name: GITHUB_TOKEN
           valueFrom:
