@@ -1,6 +1,6 @@
 .PHONY: build
 build:
-	docker build --load -t crenshaw-dev/github-executor-plugin:latest .
+	docker build --load -t crenshawdotdev/github-executor-plugin:latest .
 
 .PHONY: manifests
 manifests:
