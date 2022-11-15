@@ -1,0 +1,49 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: argocd-diff-github-comment
+spec:
+  entrypoint: main
+  templates:
+    - name: main
+      steps:
+        - - name: sync
+            template: sync
+        - - name: get-diff
+            template: get-diff
+        - - name: comment
+            template: comment
+            arguments:
+              parameters:
+                - name: diff
+                  value: "{{steps.get-diff.outputs.result}}"
+    - name: sync
+      plugin:
+        argocd:
+          app:
+            sync:
+              apps: |
+                - name: guestbook
+    - name: get-diff
+      plugin:
+        argocd:
+          app:
+            diff:
+              app:
+                name: guestbook
+              revision: 382b85852fa33f13d4987424853c5206b9231ff0
+    - name: comment
+      inputs:
+        parameters:
+          - name: diff
+      plugin:
+        github:
+          issue:
+            comment:
+              body: |
+                ```diff
+                {{inputs.parameters.diff}}
+                ```
+              number: "1"
+              owner: crenshaw-dev
+              repo: github-executor-plugin

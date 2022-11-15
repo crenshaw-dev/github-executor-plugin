@@ -2,7 +2,7 @@ package plugin
 
 // PluginSpec represents the `plugin` block of an Argo Workflows template.
 type PluginSpec struct {
-	GitHub ActionSpec `json:"github,omitempty"`
+	GitHub *ActionSpec `json:"github,omitempty"`
 }
 
 type ActionSpec struct {

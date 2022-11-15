@@ -60,7 +60,7 @@ spec:
               key: token
       name: github
       ports:
-        - containerPort: 4355
+        - containerPort: 4356
       resources:
         requests:
           cpu: 100m

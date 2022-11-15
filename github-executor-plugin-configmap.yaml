@@ -13,7 +13,7 @@ data:
     imagePullPolicy: Never
     name: github
     ports:
-    - containerPort: 4355
+    - containerPort: 4356
     resources:
       limits:
         cpu: 200m
