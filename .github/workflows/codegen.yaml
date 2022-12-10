@@ -23,7 +23,6 @@ jobs:
           # Install Argo CLI.
           curl -sLO https://github.com/argoproj/argo-workflows/releases/download/v3.4.4/argo-linux-amd64.gz
           gunzip argo-linux-amd64.gz
-          sha256 b5d9b07d4749d95213ecdb0c866fb6e8748b9b58e099a1e43a5e78c89673029e argo-linux-amd64
           chmod +x argo-linux-amd64
           mv ./argo-linux-amd64 /usr/local/bin/argo
           argo version
