@@ -31,13 +31,13 @@ data:
 kind: ConfigMap
 metadata:
   annotations:
-    workflows.argoproj.io/description: "This is an Argo Workflow executor plugin for
-      interacting with GitHub.\n\n## Example\n\n```yaml\napiVersion: argoproj.io/v1alpha1\nkind:
-      Workflow\nmetadata:\n  generateName: github-example-\nspec:\n  entrypoint: main\n
-      \ templates:\n    - name: main\n      plugin:\n        github:\n          #
-      Use `issue` to create comments for PRs - the GitHub API considers PRs to be
-      issues.\n          issue:\n            comment:\n              body: \"Hello,
-      world!\"\n              number: \"1\"  # PR number, from the \n              owner:
+    workflows.argoproj.io/description: "[![codecov](https://codecov.io/gh/crenshaw-dev/github-executor-plugin/branch/main/graph/badge.svg?token=MD2ZVGZ5G9)](https://codecov.io/gh/crenshaw-dev/github-executor-plugin)\n\nThis
+      is an Argo Workflows executor plugin for interacting with GitHub.\n\n## Example\n\n```yaml\napiVersion:
+      argoproj.io/v1alpha1\nkind: Workflow\nmetadata:\n  generateName: github-example-\nspec:\n
+      \ entrypoint: main\n  templates:\n    - name: main\n      plugin:\n        github:\n
+      \         # Use `issue` to create comments for PRs - the GitHub API considers
+      PRs to be issues.\n          issue:\n            comment:\n              body:
+      \"Hello, world!\"\n              number: \"1\"  # PR number, from the \n              owner:
       crenshaw-dev\n              repo: github-executor-plugin\n```\n\n## Prerequisites\n\n###
       Set up a GitHub personal access token\n\nSee [GitHub's instructions](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token)\nto
       set up your token.\n\nThen create a secret using that token.\n\n```bash\n# First,
