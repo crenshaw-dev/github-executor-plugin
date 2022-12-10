@@ -24,7 +24,8 @@ func main() {
 	)
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
-	executor := githubexecutor.NewGitHubExecutor(client, string(agentToken))
+	gitHubClient := &githubexecutor.GitHubClient{Issues: client.Issues}
+	executor := githubexecutor.NewGitHubExecutor(gitHubClient, string(agentToken))
 	http.HandleFunc("/api/v1/template.execute", githubexecutor.GitHubPlugin(&executor))
 	err = http.ListenAndServe(":4356", nil)
 	if err != nil {

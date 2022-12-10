@@ -17,11 +17,11 @@ import (
 )
 
 type GitHubExecutor struct {
-	client     *github.Client
+	client     *GitHubClient
 	agentToken string
 }
 
-func NewGitHubExecutor(client *github.Client, agentToken string) GitHubExecutor {
+func NewGitHubExecutor(client *GitHubClient, agentToken string) GitHubExecutor {
 	return GitHubExecutor{client: client, agentToken: agentToken}
 }
 
@@ -81,7 +81,7 @@ func (e *GitHubExecutor) runAction(plugin *PluginSpec) (string, error) {
 	var response *github.Response
 	var expectedResponseCode int
 	if plugin.GitHub.Issue != nil {
-		response, expectedResponseCode, err = e.runIssueAction(ctx, plugin)
+		response, expectedResponseCode, err = e.runIssueAction(ctx, plugin.GitHub.Issue)
 	} else {
 		return "", fmt.Errorf("unsupported action")
 	}
@@ -98,12 +98,12 @@ func (e *GitHubExecutor) runAction(plugin *PluginSpec) (string, error) {
 	return "", nil
 }
 
-func (e *GitHubExecutor) runIssueAction(ctx context.Context, plugin *PluginSpec) (*github.Response, int, error) {
-	if err := validateIssueAction(plugin.GitHub.Issue); err != nil {
+func (e *GitHubExecutor) runIssueAction(ctx context.Context, issueAction *IssueActionSpec) (*github.Response, int, error) {
+	if err := validateIssueAction(issueAction); err != nil {
 		return nil, 0, fmt.Errorf("failed to validate issue action: %w", err)
 	}
-	if plugin.GitHub.Issue.Comment != nil {
-		body, owner, repo, number, err := validateIssueCreateCommentAction(plugin.GitHub.Issue.Comment)
+	if issueAction.Comment != nil {
+		body, owner, repo, number, err := validateIssueCreateCommentAction(issueAction.Comment)
 		if err != nil {
 			return nil, 0, fmt.Errorf("invalid issue comment action: %w", err)
 		}
@@ -111,11 +111,11 @@ func (e *GitHubExecutor) runIssueAction(ctx context.Context, plugin *PluginSpec)
 			Body: &body,
 		})
 		return response, 201, err
-	} else if plugin.GitHub.Issue.Create != nil {
-		if err := validateIssueCreateAction(plugin.GitHub.Issue.Create); err != nil {
+	} else if issueAction.Create != nil {
+		if err := validateIssueCreateAction(issueAction.Create); err != nil {
 			return nil, 0, fmt.Errorf("invalid issue create action: %w", err)
 		}
-		_, response, err := e.client.Issues.Create(ctx, plugin.GitHub.Issue.Create.Owner, plugin.GitHub.Issue.Create.Repo, plugin.GitHub.Issue.Create.Request)
+		_, response, err := e.client.Issues.Create(ctx, issueAction.Create.Owner, issueAction.Create.Repo, issueAction.Create.Request)
 		return response, 201, err
 	}
 	return nil, 0, fmt.Errorf("unsupported issue action")

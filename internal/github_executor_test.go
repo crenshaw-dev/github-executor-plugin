@@ -4,8 +4,12 @@ import (
 	"context"
 	"testing"
 
+	"github.com/google/go-github/github"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+
+	"github.com/crenshaw-dev/github-executor-plugin/internal/mocks"
 )
 
 func Test_validateIssueAction(t *testing.T) {
@@ -20,6 +24,24 @@ func Test_validateIssueAction(t *testing.T) {
 		})
 		assert.Error(t, err)
 	})
+}
+
+func Test_runIssueAction(t *testing.T) {
+	issuesClient := mocks.NewGitHubIssuesClient(t)
+	var r *github.IssueRequest
+	issuesClient.Mock.On("Create", mock.Anything, "test", "test", r).Return(&github.Issue{}, nil, nil)
+	client := &GitHubClient{
+		Issues: issuesClient,
+	}
+	e := NewGitHubExecutor(client, "")
+	_, expectedStatusCode, err := e.runIssueAction(context.Background(), &IssueActionSpec{
+		Create: &IssueCreateAction{
+			Owner: "test",
+			Repo:  "test",
+		},
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, expectedStatusCode, 201)
 }
 
 func Test_validateIssueCreateCommentAction(t *testing.T) {
