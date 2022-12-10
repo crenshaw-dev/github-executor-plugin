@@ -3,7 +3,7 @@ module github.com/crenshaw-dev/github-executor-plugin
 go 1.19
 
 require (
-	github.com/argoproj/argo-workflows/v3 v3.4.3
+	github.com/argoproj/argo-workflows/v3 v3.4.4
 	github.com/google/go-github v17.0.0+incompatible
 	golang.org/x/oauth2 v0.2.0
 )
@@ -32,7 +32,7 @@ require (
 	golang.org/x/text v0.4.0 // indirect
 	golang.org/x/time v0.0.0-20220922220347-f3bd1da661af // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20221018160656-63c7b68cfc55 // indirect
+	google.golang.org/genproto v0.0.0-20221027153422-115e99e71e1c // indirect
 	google.golang.org/grpc v1.50.1 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
