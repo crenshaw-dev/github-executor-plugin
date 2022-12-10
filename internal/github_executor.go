@@ -131,7 +131,7 @@ func validateIssueAction(action *IssueActionSpec) error {
 	return nil
 }
 
-func validateIssueCreateCommentAction(action *CommentAction) (body, owner, repo string, number int, err error) {
+func validateIssueCreateCommentAction(action *IssueCommentAction) (body, owner, repo string, number int, err error) {
 	if action.Body == "" {
 		return "", "", "", -1, fmt.Errorf("the issue comment body is required")
 	}

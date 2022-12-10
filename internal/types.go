@@ -13,11 +13,11 @@ type ActionSpec struct {
 }
 
 type IssueActionSpec struct {
-	Comment *CommentAction     `json:"comment,omitempty"`
-	Create  *IssueCreateAction `json:"create,omitempty"`
+	Comment *IssueCommentAction `json:"comment,omitempty"`
+	Create  *IssueCreateAction  `json:"create,omitempty"`
 }
 
-type CommentAction struct {
+type IssueCommentAction struct {
 	Body   string `json:"body,omitempty"`
 	Owner  string `json:"owner,omitempty"`
 	Repo   string `json:"repo,omitempty"`
