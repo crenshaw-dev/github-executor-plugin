@@ -5,3 +5,7 @@ build:
 .PHONY: manifests
 manifests:
 	argo executor-plugin build .
+
+.PHONY: test
+test:
+	go test -v ./... -coverprofile cover.out
