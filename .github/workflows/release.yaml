@@ -1,0 +1,66 @@
+name: Create release
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    uses: crenshaw-dev/github-executor-plugin/.github/workflows/build.yaml@main
+    with:
+      tag: ${{ github.event.inputs.tag }}
+    secrets:
+      DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+  prepare-release:
+    needs: build
+    permissions:
+      contents: write # To push changes to release branch
+    name: Release
+    if: github.repository == 'crenshaw-dev/github-executor-plugin'
+    runs-on: ubuntu-22.04
+    env:
+      GIT_USERNAME: crenshaw-dev
+      GIT_EMAIL: 350466+crenshaw-dev@users.noreply.github.com
+      RELEASE_TAG: ${{ github.event.inputs.tag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Update plugin.yaml image tag
+        id: manifests
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq -i '.spec.sidecar.container.image = "crenshawdotdev/github-executor-plugin:" + strenv(RELEASE_TAG)' manifests/plugin.yaml
+      - name: Update install manifest
+        run: |
+          # Download the binary
+          curl -sLO https://github.com/argoproj/argo-workflows/releases/download/v3.4.3/argo-linux-amd64.gz
+          gunzip argo-linux-amd64.gz
+          chmod +x argo-linux-amd64
+          ./argo-linux-amd64 executor-plugin build ./manifests
+      - name: Push release tag
+        run: |
+          set -ue
+          
+          git config --global user.email "${GIT_EMAIL}"
+          git config --global user.name "${GIT_USERNAME}"
+          
+          git commit manifests/ -m "Bump version to $RELEASE_TAG"
+          git push origin HEAD
+
+          git tag ${RELEASE_TAG}
+          git push origin ${RELEASE_TAG} --force
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: ${{ env.RELEASE_TAG }}
+          tag_name: ${{ env.RELEASE_TAG }}
+          generate_release_notes: true

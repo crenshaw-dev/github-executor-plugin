@@ -4,7 +4,9 @@
 * Needs: >= v3.3
 * Image: crenshawdotdev/github-executor-plugin:latest
 
-This is an Argo Workflow executor plugin for interacting with GitHub.
+[![codecov](https://codecov.io/gh/crenshaw-dev/github-executor-plugin/branch/main/graph/badge.svg?token=MD2ZVGZ5G9)](https://codecov.io/gh/crenshaw-dev/github-executor-plugin)
+
+This is an Argo Workflows executor plugin for interacting with GitHub.
 
 ## Example
 

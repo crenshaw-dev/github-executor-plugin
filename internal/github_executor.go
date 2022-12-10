@@ -17,11 +17,11 @@ import (
 )
 
 type GitHubExecutor struct {
-	client     *github.Client
+	client     *GitHubClient
 	agentToken string
 }
 
-func NewGitHubExecutor(client *github.Client, agentToken string) GitHubExecutor {
+func NewGitHubExecutor(client *GitHubClient, agentToken string) GitHubExecutor {
 	return GitHubExecutor{client: client, agentToken: agentToken}
 }
 
@@ -78,53 +78,90 @@ func (e *GitHubExecutor) runAction(plugin *PluginSpec) (string, error) {
 		return "", fmt.Errorf("failed to parse timeout: %w", err)
 	}
 	defer cancel()
-	body, owner, repo, number, err := validateIssueAction(plugin.GitHub.Issue)
-	if err != nil {
-		return "", fmt.Errorf("invalid issue action: %w", err)
+	var response *github.Response
+	var expectedResponseCode int
+	if plugin.GitHub.Issue != nil {
+		response, expectedResponseCode, err = e.runIssueAction(ctx, plugin.GitHub.Issue)
+	} else {
+		return "", fmt.Errorf("unsupported action")
 	}
-	_, response, err := e.client.Issues.CreateComment(ctx, owner, repo, number, &github.IssueComment{
-		Body: &body,
-	})
 	if err != nil {
-		return "", fmt.Errorf("failed to create issue comment: %w", err)
+		return "", fmt.Errorf("failed to run action: %w", err)
 	}
-	if response.StatusCode != 201 {
+	if response.StatusCode != expectedResponseCode {
 		responseBody, err := io.ReadAll(response.Body)
 		if err != nil {
 			return "", fmt.Errorf("failed to read response body: %w", err)
 		}
-		return "", fmt.Errorf("failed to create issue comment: %s", string(responseBody))
+		return "", fmt.Errorf("expected response code %d but got %d: %s", expectedResponseCode, response.StatusCode, string(responseBody))
 	}
 	return "", nil
 }
 
-func validateIssueAction(action *IssueActionSpec) (body, owner, repo string, number int, err error) {
-	if action == nil {
-		return "", "", "", -1, fmt.Errorf("the only available action for the GitHub plugin is 'issue'")
+func (e *GitHubExecutor) runIssueAction(ctx context.Context, issueAction *IssueActionSpec) (*github.Response, int, error) {
+	if err := validateIssueAction(issueAction); err != nil {
+		return nil, 0, fmt.Errorf("failed to validate issue action: %w", err)
 	}
-	if action.Comment == nil {
-		return "", "", "", -1, fmt.Errorf("the only available action for issues is `comment`")
+	if issueAction.Comment != nil {
+		body, owner, repo, number, err := validateIssueCreateCommentAction(issueAction.Comment)
+		if err != nil {
+			return nil, 0, fmt.Errorf("invalid issue comment action: %w", err)
+		}
+		_, response, err := e.client.Issues.CreateComment(ctx, owner, repo, number, &github.IssueComment{
+			Body: &body,
+		})
+		return response, 201, err
+	} else if issueAction.Create != nil {
+		if err := validateIssueCreateAction(issueAction.Create); err != nil {
+			return nil, 0, fmt.Errorf("invalid issue create action: %w", err)
+		}
+		_, response, err := e.client.Issues.Create(ctx, issueAction.Create.Owner, issueAction.Create.Repo, issueAction.Create.Request)
+		return response, 201, err
 	}
-	if action.Comment.Body == "" {
+	return nil, 0, fmt.Errorf("unsupported issue action")
+}
+
+func validateIssueAction(action *IssueActionSpec) error {
+	if action.Comment == nil && action.Create == nil {
+		return fmt.Errorf("the only available issue actions are 'comment' and 'create")
+	}
+	if action.Comment != nil && action.Create != nil {
+		return fmt.Errorf("only one issue action can be specified")
+	}
+	return nil
+}
+
+func validateIssueCreateCommentAction(action *IssueCommentAction) (body, owner, repo string, number int, err error) {
+	if action.Body == "" {
 		return "", "", "", -1, fmt.Errorf("the issue comment body is required")
 	}
-	if action.Comment.Owner == "" {
+	if action.Owner == "" {
 		return "", "", "", -1, fmt.Errorf("the issue owner is required")
 	}
-	if action.Comment.Repo == "" {
+	if action.Repo == "" {
 		return "", "", "", -1, fmt.Errorf("the issue repo is required")
 	}
-	if action.Comment.Number == "" {
+	if action.Number == "" {
 		return "", "", "", -1, fmt.Errorf("the issue number is required")
 	}
-	number, err = strconv.Atoi(action.Comment.Number)
+	number, err = strconv.Atoi(action.Number)
 	if err != nil {
 		return "", "", "", -1, fmt.Errorf("the issue number must be an integer")
 	}
 	if number < 0 {
 		return "", "", "", -1, fmt.Errorf("the issue number must be greater than or equal to 0")
 	}
-	return action.Comment.Body, action.Comment.Owner, action.Comment.Repo, number, nil
+	return action.Body, action.Owner, action.Repo, number, nil
+}
+
+func validateIssueCreateAction(action *IssueCreateAction) error {
+	if action.Owner == "" {
+		return fmt.Errorf("the issue owner is required")
+	}
+	if action.Repo == "" {
+		return fmt.Errorf("the issue repo is required")
+	}
+	return nil
 }
 
 // durationStringToContext parses a duration string and returns a context and cancel function. If timeout is empty, the

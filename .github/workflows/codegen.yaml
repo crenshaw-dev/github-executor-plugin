@@ -1,0 +1,32 @@
+name: Codegen
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    types: [ opened, synchronize, reopened ]
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    if: github.repository == 'crenshaw-dev/github-executor-plugin'
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - run: |
+          # Install Argo CLI.
+          curl -sLO https://github.com/argoproj/argo-workflows/releases/download/v3.4.4/argo-linux-amd64.gz
+          gunzip argo-linux-amd64.gz
+          chmod +x argo-linux-amd64
+          mv ./argo-linux-amd64 /usr/local/bin/argo
+          argo version
+          
+          make manifests
+          
+          git diff --exit-code
