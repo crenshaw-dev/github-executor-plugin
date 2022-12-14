@@ -29,6 +29,38 @@ metadata:
                     number: "1"  # PR number, from the 
                     owner: crenshaw-dev
                     repo: github-executor-plugin
+                check:
+                  create:
+                    owner:  # Required
+                    repo:  # Required
+                    name:  # Required
+                    head_branch: # Optional
+                    head_sha: # Optional
+                    details_url: # Optional
+                    external_id: # Optional
+                    status: # Optional
+                    conclusion: # Optional
+                    started_at: # Optional
+                    completed_at: # Optional
+                    output: # Optional
+                      title:
+                      summary:
+                      text:
+                      annotations_count:
+                      annotations_url:
+                      annotations:
+                      - filename:
+                        blob_href:
+                        start_line:
+                        end_line:
+                        warning_level:
+                        message:
+                        title:
+                        raw_details:
+                      images:
+                      - alt:
+                        image_url:
+                        caption:
       ```
       
       ## Prerequisites

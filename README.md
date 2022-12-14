@@ -40,7 +40,8 @@ to set up your token.
 Then create a secret using that token.
 
 ```bash
-# First, copy your token to the clipboard.
+# Before running the next command, copy your token to the clipboard.
+# Then use pbpaste to paste that token into a file called "token".
 pbpaste > token
 kubectl create secret generic github-token --from-file=token -n argo
 rm token
@@ -51,8 +52,8 @@ rm token
 
 Install:
 
-    kubectl apply -f github-executor-plugin-configmap.yaml
+    kubectl apply -n argo -f github-executor-plugin-configmap.yaml
 
 Uninstall:
 	
-    kubectl delete cm github-executor-plugin 
+    kubectl delete -n argo cm github-executor-plugin 
