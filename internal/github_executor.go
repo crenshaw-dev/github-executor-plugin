@@ -82,6 +82,8 @@ func (e *GitHubExecutor) runAction(plugin *PluginSpec) (string, error) {
 	var expectedResponseCode int
 	if plugin.GitHub.Issue != nil {
 		response, expectedResponseCode, err = e.runIssueAction(ctx, plugin.GitHub.Issue)
+	} else if plugin.GitHub.Check != nil {
+		response, expectedResponseCode, err = e.runCheckAction(ctx, plugin.GitHub.Check)
 	} else {
 		return "", fmt.Errorf("unsupported action")
 	}
@@ -119,6 +121,24 @@ func (e *GitHubExecutor) runIssueAction(ctx context.Context, issueAction *IssueA
 		return response, 201, err
 	}
 	return nil, 0, fmt.Errorf("unsupported issue action")
+}
+
+func (e *GitHubExecutor) runCheckAction(ctx context.Context, checkAction *CheckActionSpec) (*github.Response, int, error) {
+	if err := validateCheckAction(checkAction); err != nil {
+		return nil, 0, fmt.Errorf("failed to validate check action: %w", err)
+	}
+	_, response, err := e.client.Checks.CreateCheckRun(ctx, checkAction.Create.Owner, checkAction.Create.Repo, checkAction.Create.Request)
+	return response, 201, err
+}
+
+func validateCheckAction(action *CheckActionSpec) error {
+	if action.Create == nil {
+		return err
+	}
+	if action.Create.Repo == "" {
+		return err
+	}
+	if action.Create.
 }
 
 func validateIssueAction(action *IssueActionSpec) error {

@@ -9,6 +9,7 @@ type PluginSpec struct {
 
 type ActionSpec struct {
 	Issue   *IssueActionSpec `json:"issue,omitempty"`
+	Check   *CheckActionSpec `json:"check,omitempty"`
 	Timeout string           `json:"timeout,omitempty"`
 }
 
@@ -28,4 +29,14 @@ type IssueCreateAction struct {
 	Owner   string               `json:"owner,omitempty"`
 	Repo    string               `json:"repo,omitempty"`
 	Request *github.IssueRequest `json:"-"`
+}
+
+type CheckCreateAction struct {
+	Owner   string                       `json:"owner,omitempty"`
+	Repo    string                       `json:"repo,omitempty"`
+	Request github.CreateCheckRunOptions `json:"-"`
+}
+
+type CheckActionSpec struct {
+	Create CheckCreateAction `json:"create,omitempty"`
 }
