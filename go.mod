@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/argoproj/argo-workflows/v3 v3.4.4
 	github.com/google/go-github v17.0.0+incompatible
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.2
 	golang.org/x/oauth2 v0.2.0
 )
 
